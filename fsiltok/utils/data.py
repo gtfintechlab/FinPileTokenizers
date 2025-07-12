@@ -36,7 +36,7 @@ class DocumentTapeDataset(Dataset):
 
     def __getitem__(self, index : int) -> np.ndarray:
         # Ensure index is within bounds
-        if index < 0 or index >= self._total_docs:
+        if index < 0 or index >= self._total_chunks:
             raise IndexError("Index out of bounds")
         
         # Fetch the offsets for the document
