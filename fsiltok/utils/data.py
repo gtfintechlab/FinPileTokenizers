@@ -36,14 +36,14 @@ class DocumentTapeDataset(Dataset):
 
     def __getitem__(self, index : int) -> np.ndarray:
         # Ensure index is within bounds
-        if index < 0 or index >= self._total_docs:
+        if index < 0 or index >= self._total_chunks:
             raise IndexError("Index out of bounds")
         
         # Fetch the offsets for the document
-        if not self._handle:
+        if self._handle is None:
             self._handle = np.memmap(f"{self.prefix}.bin", dtype=self._token_dtype, mode='r', shape=(self._total_tokens,))
 
-        if not self._offsets:
+        if self._offsets is None:
             self._offsets = np.memmap(f"{self.prefix}.idx", dtype=self._offsets_dtype, mode='r', shape=(self._total_docs,))
 
         id_start = self._chunk_size * index
@@ -90,7 +90,7 @@ class DocumentTapeDataset(Dataset):
             mask[start:end, start:end] = np.tri(count, k=0, dtype=np.bool_)
 
         return {
-            "tokens": tokens,
+            "input_ids": tokens,
             "position_ids": position_ids,
             "mask": mask
         }
