@@ -103,7 +103,7 @@ class DocumentTapeDataset(Dataset):
         return self._total_chunks
         
     @staticmethod
-    def collate_chunks(batch : List[dict[str, np.ndarray]]) -> dict[str, torch.Tensor]:
+    def collate_chunks(batch : List[dict]) -> dict:
         """
         Collate a batch of chunks into a single dictionary.
         """
