@@ -37,7 +37,7 @@ if __name__ == "__main__":
 
         # You might want to turn this mask into an additive mask
 
-        mask = ~mask * torch.finfo(torch.float32).min
+        # mask = ~mask * torch.finfo(torch.float32).min
 
         #  Train your model here
 
