@@ -34,7 +34,11 @@ if __name__ == "__main__":
         assert input_ids.shape == (B, L)
         assert position_ids.shape == (B, L)
         assert mask.shape == (B, L, L)
-        
+
+        # You might want to turn this mask into an additive mask
+
+        mask = ~mask * torch.finfo(torch.float32).min
+
         #  Train your model here
 
 
