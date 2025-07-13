@@ -84,10 +84,6 @@ def main():
     print(f"Dataset built successfully at {args.prefix}.bin with index {args.prefix}.idx")
     print(f"Total size: {builder._size} tokens.")
 
-
-
-
-
-
+# Probably not needed - should be run with the pyproject entrypoint 'fsiltok [args]'
 if __name__ == "__main__":
     main()
