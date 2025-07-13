@@ -11,12 +11,13 @@ authors = [
 ]
 readme = "README.md"
 requires-python = ">=3.8"
-license = { text = "MIT" }
+license = { text = "CCO-1.0" }
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+
+# Do NOT add torch to these dependencies. Let the user figure it out lest we download the wrong version.
 dependencies = [
     "transformers",
     "orjson",
