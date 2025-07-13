@@ -123,9 +123,11 @@ class DocumentTapeDataset(Dataset):
         **kwargs
     ):
         assert "collate_fn" not in kwargs, "collate_fn is set automatically."
+        assert "drop_last" not in kwargs, "drop_last is set to True by default."
 
         return torch.utils.data.DataLoader(
             dataset,
             collate_fn=DocumentTapeDataset.collate_chunks,
+            drop_last=True,
             **kwargs
         )
