@@ -107,9 +107,9 @@ class DocumentTapeDataset(Dataset):
         """
         Collate a batch of chunks into a single dictionary.
         """
-        input_ids = np.concatenate([item["input_ids"] for item in batch])
-        position_ids = np.concatenate([item["position_ids"] for item in batch])
-        masks = np.concatenate([item["mask"] for item in batch], axis=0)
+        input_ids = np.stack([item["input_ids"] for item in batch], axis=0)
+        position_ids = np.stack([item["position_ids"] for item in batch], axis=0)
+        masks = np.stack([item["mask"] for item in batch], axis=0)
 
         return {
             "input_ids": torch.tensor(input_ids, dtype=torch.long),
