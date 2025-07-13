@@ -7,7 +7,7 @@ name = "fsiltok"
 version = "0.1.0"
 description = "A very simple tokenizer for FSIL"
 authors = [
-    { name="Rodrigo Loza", email="roloa7@gmail.com" }
+    { name="Rodrigo Loza", email="roloza7@gmail.com" }
 ]
 readme = "README.md"
 requires-python = ">=3.8"
