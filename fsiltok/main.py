@@ -9,8 +9,6 @@ from functools import partial
 from multiprocessing import Pool
 from tqdm import tqdm
 
-from typing import List
-
 tokenizer_ : AutoTokenizer = None
 
 def init_tokenizer(tokenizer_name: str, use_fast: bool = True):
@@ -29,47 +27,7 @@ def tokenize(document: str, append_eos: bool, dtype: np.dtype) -> np.ndarray:
 
     return np.array(tokens, dtype=dtype), len(tokens)
 
-def main(
-    input_paths: List[os.PathLike],
-    prefix: os.PathLike,
-    tokenizer: str,
-    append_eos: bool = False,
-    threads: int = 1,
-    dtype: np.dtype = np.uint16,
-    textField: str = "text",
-    use_fast: bool = True
-):
-    global tokenizer_
-
-    stream = iter(JSONLFileReader(input_paths, textField=textField, threads=0))
-    builder = DatasetBuilder(prefix, dtype=dtype)
-
-    tokenize_partial = partial(tokenize, append_eos=append_eos, dtype=dtype)
-
-    stream = tqdm(stream, desc="Read documents", unit=" documents", position=0, leave=False)
-
-    if threads > 1:
-        pool = Pool(threads, initializer=init_tokenizer, initargs=(tokenizer, use_fast))
-        stream = pool.imap(tokenize_partial, stream, chunksize=1)
-    else:
-        init_tokenizer(tokenizer, use_fast=use_fast)
-        stream = map(tokenize_partial, stream)
-
-    stream = tqdm(stream, desc="Tokenized documents", unit=" documents", position=1, leave=False)
-    for tokens, size in stream:
-        if size > 0:
-            builder.extend(tokens)
-
-    builder.finalize()
-    print(f"Dataset built successfully at {prefix}.bin with index {prefix}.idx")
-    print(f"Total size: {builder._size} tokens.")
-
-
-
-
-
-
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description="Run the fsiltok tokenizer.")
     parser.add_argument("--input", type=str, required=True, help="Path to the input file.")
     parser.add_argument("--prefix", type=str, required=True, help="Prefix for the output files.")
@@ -100,13 +58,32 @@ if __name__ == "__main__":
     dtype : np.dtype = np.dtype(args.dtype)
     assert dtype in [np.uint16, np.uint32, np.uint64], "Unsupported data type. Use uint16, uint32, or uint64."
 
-    main(
-        input_paths=paths,
-        prefix=args.prefix,
-        append_eos=args.append_eos,
-        threads=args.threads,
-        tokenizer=args.tokenizer,
-        dtype=dtype,
-        textField=args.text_field,
-        use_fast=args.use_slow is False
-    )
+
+    global tokenizer_
+
+    stream = iter(JSONLFileReader(args.input, textField=args.text_field, threads=0))
+    builder = DatasetBuilder(args.prefix, dtype=dtype)
+
+    tokenize_partial = partial(tokenize, append_eos=args.append_eos, dtype=dtype)
+
+    stream = tqdm(stream, desc="Read documents", unit=" documents", position=0, leave=False)
+
+    if args.threads > 1:
+        pool = Pool(args.threads, initializer=init_tokenizer, initargs=(args.tokenizer, args.use_fast))
+        stream = pool.imap(tokenize_partial, stream, chunksize=1)
+    else:
+        init_tokenizer(args.tokenizer, use_fast=args.use_fast)
+        stream = map(tokenize_partial, stream)
+
+    stream = tqdm(stream, desc="Tokenized documents", unit=" documents", position=1, leave=False)
+    for tokens, size in stream:
+        if size > 0:
+            builder.extend(tokens)
+
+    builder.finalize()
+    print(f"Dataset built successfully at {args.prefix}.bin with index {args.prefix}.idx")
+    print(f"Total size: {builder._size} tokens.")
+
+# Probably not needed - should be run with the pyproject entrypoint 'fsiltok [args]'
+if __name__ == "__main__":
+    main()

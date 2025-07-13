@@ -24,3 +24,6 @@ dependencies = [
     "tqdm",
     "numpy"
 ]
+
+[project.scripts]
+fsiltok = "fsiltok.main:main"
