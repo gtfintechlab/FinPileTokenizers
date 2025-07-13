@@ -1,6 +1,10 @@
 import os
+from typing import List, TypeVar
 import numpy as np
 from torch.utils.data import Dataset
+import torch
+
+TDocumentTapeDataset = TypeVar("TDocumentTapeDataset", bound="DocumentTapeDataset")
 
 # Dataset class for DocumentTapeDataset
 # This class is designed to handle a dataset of documents stored in a memory-mapped file format
@@ -97,3 +101,33 @@ class DocumentTapeDataset(Dataset):
 
     def __len__(self):
         return self._total_chunks
+        
+    @staticmethod
+    def collate_chunks(batch : List[dict]) -> dict:
+        """
+        Collate a batch of chunks into a single dictionary.
+        """
+        input_ids = np.concatenate([item["input_ids"] for item in batch])
+        position_ids = np.concatenate([item["position_ids"] for item in batch])
+        masks = np.concatenate([item["mask"] for item in batch], axis=0)
+
+        return {
+            "input_ids": torch.tensor(input_ids, dtype=torch.long),
+            "position_ids": torch.tensor(position_ids, dtype=torch.long),
+            "mask": torch.tensor(masks, dtype=torch.bool)
+        }
+
+    @staticmethod
+    def get_dataloader(
+        dataset : TDocumentTapeDataset,
+        **kwargs
+    ):
+        assert "collate_fn" not in kwargs, "collate_fn is set automatically."
+        assert "drop_last" not in kwargs, "drop_last is set to True by default."
+
+        return torch.utils.data.DataLoader(
+            dataset,
+            collate_fn=DocumentTapeDataset.collate_chunks,
+            drop_last=True,
+            **kwargs
+        )
