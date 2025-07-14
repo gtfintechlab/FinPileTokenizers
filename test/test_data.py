@@ -78,8 +78,9 @@ class TestDataUtils(unittest.TestCase):
         for index, token in enumerate(input_ids):
             seq_len += 1
             self.assertTrue(mask[index, start:start+seq_len].all())
+            self.assertFalse(mask[index, start+seq_len:].any())
             if start != 0:
-               self.assertFalse(mask[index, :start].all())
+               self.assertFalse(mask[index, :start].any())
             if token == 0:  # Reset condition
                 start = index + 1
                 seq_len = 0
