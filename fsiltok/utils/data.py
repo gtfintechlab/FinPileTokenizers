@@ -114,7 +114,8 @@ class DocumentTapeDataset(Dataset):
         return {
             "input_ids": torch.tensor(input_ids, dtype=torch.long),
             "position_ids": torch.tensor(position_ids, dtype=torch.long),
-            "mask": torch.tensor(masks, dtype=torch.bool)
+            "mask": torch.tensor(masks, dtype=torch.bool),
+            "labels": torch.tensor(input_ids, dtype=torch.long)  # Assuming labels are the same as input_ids
         }
 
     @staticmethod
