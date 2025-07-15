@@ -66,9 +66,12 @@ class DocumentTapeDataset(Dataset):
         ### Packed Position IDs
 
         resets = (tokens == self._eod_token_id)
+        resets = np.roll(resets, 1)  # Shift to the right to include the first token
+        resets[0] = False  # The first token is not a reset
 
-        group_ids = np.cumsum(np.roll(resets, 1))
-        group_ids[0] = 0 # Fix the first element
+
+
+        group_ids = np.cumsum(resets)
         # [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ...] <- idx
         # [0, 0, 0, 1, 1, 1, 1, 1, 2, 2, ...] <- group ids
         # [0, 0, 0, 1, 0, 0, 0, 0, 1, 0, ...] <- resets
@@ -96,7 +99,7 @@ class DocumentTapeDataset(Dataset):
         return {
             "input_ids": tokens,
             "position_ids": position_ids,
-            "mask": mask
+            "attention_mask": mask
         }
 
     def __len__(self):
@@ -109,12 +112,12 @@ class DocumentTapeDataset(Dataset):
         """
         input_ids = np.stack([item["input_ids"] for item in batch], axis=0)
         position_ids = np.stack([item["position_ids"] for item in batch], axis=0)
-        masks = np.stack([item["mask"] for item in batch], axis=0)
+        masks = np.stack([item["attention_mask"] for item in batch], axis=0)
 
         return {
             "input_ids": torch.tensor(input_ids, dtype=torch.long),
             "position_ids": torch.tensor(position_ids, dtype=torch.long),
-            "mask": torch.tensor(masks, dtype=torch.bool),
+            "attention_mask": torch.tensor(masks, dtype=torch.bool),
             "labels": torch.tensor(input_ids, dtype=torch.long)  # Assuming labels are the same as input_ids
         }
 
